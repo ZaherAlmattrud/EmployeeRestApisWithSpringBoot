@@ -1,9 +1,11 @@
 package com.example.EmployeeRestApisWithSpringBoot.service;
 
 
+import com.example.EmployeeRestApisWithSpringBoot.dto.EmployeeDto;
 import com.example.EmployeeRestApisWithSpringBoot.exception.EmployeeNotFoundException;
 import com.example.EmployeeRestApisWithSpringBoot.model.Employee;
 import com.example.EmployeeRestApisWithSpringBoot.repository.EmployeeRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,22 +19,33 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository ;
 
+    private ModelMapper modelMapper;
 
-    public Employee createEmployee(Employee employee){
 
-        return employeeRepository.save(employee);
+    public EmployeeDto createEmployee(EmployeeDto employeeDto){
+
+        Employee employee = modelMapper.map(employeeDto, Employee.class);
+        Employee savedEmployee = employeeRepository.save(employee);
+        EmployeeDto savedEmployeeDto = modelMapper.map(savedEmployee, EmployeeDto.class);
+        return savedEmployeeDto ;
     }
 
-    public Employee updateEmployee(Long id ,Employee employee){
+    public EmployeeDto updateEmployee(Long id ,EmployeeDto employeeDto){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+          Employee employee = null ;
+          employee = employeeRepository.findById(id).get();
 
-        if(! optionalEmployee.isPresent()){
+        if(employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
         employee.setId(id);
-        return employeeRepository.save(employee);
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        EmployeeDto updatedEmployeeDto = modelMapper.map(updatedEmployee, EmployeeDto.class);
+
+        return updatedEmployeeDto ;
 
     }
 
