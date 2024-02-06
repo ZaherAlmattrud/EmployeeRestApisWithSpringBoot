@@ -20,6 +20,7 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository ;
 
+    @Autowired
     private ModelMapper modelMapper;
 
 
@@ -36,11 +37,16 @@ public class EmployeeService {
 
         Employee  employee = employeeRepository.findById(id).orElse(null);
 
+        System.out.print(employee);
         if(employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
         employee.setId(id);
+        employee.setFirstName(employeeDto.getFirstName());
+        employee.setLastName(employeeDto.getLastName());
+        employee.setSalary(employeeDto.getSalary());
+
 
         Employee updatedEmployee = employeeRepository.save(employee);
 

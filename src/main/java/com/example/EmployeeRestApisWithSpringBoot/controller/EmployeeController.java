@@ -25,13 +25,13 @@ public class EmployeeController
 
 
 @PostMapping("/create")
-    public ResponseEntity<EmployeeDto> createEmployee(EmployeeDto employeeDto){
+    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto){
 
         return employeeService.createEmployee(employeeDto);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<EmployeeDto> updateEmployee(Long id ,EmployeeDto employeeDto){
+    @PutMapping("/update/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable Long id ,@RequestBody EmployeeDto employeeDto){
 
 
         return employeeService.updateEmployee(id , employeeDto);
@@ -46,7 +46,7 @@ public class EmployeeController
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> getEmployee(Long id){
+    public ResponseEntity<EmployeeDto> getEmployee(@PathVariable Long id){
 
         return  employeeService.getEmployee(id);
 
