@@ -7,6 +7,7 @@ import com.example.EmployeeRestApisWithSpringBoot.model.Employee;
 import com.example.EmployeeRestApisWithSpringBoot.repository.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,18 +23,18 @@ public class EmployeeService {
     private ModelMapper modelMapper;
 
 
-    public EmployeeDto createEmployee(EmployeeDto employeeDto){
+    public ResponseEntity<EmployeeDto> createEmployee(EmployeeDto employeeDto){
 
         Employee employee = modelMapper.map(employeeDto, Employee.class);
         Employee savedEmployee = employeeRepository.save(employee);
         EmployeeDto savedEmployeeDto = modelMapper.map(savedEmployee, EmployeeDto.class);
-        return savedEmployeeDto ;
+        return ResponseEntity.ok(savedEmployeeDto) ;
     }
 
-    public EmployeeDto updateEmployee(Long id ,EmployeeDto employeeDto){
+    public ResponseEntity<EmployeeDto> updateEmployee(Long id ,EmployeeDto employeeDto){
 
-          Employee employee = null ;
-          employee = employeeRepository.findById(id).get();
+
+        Employee  employee = employeeRepository.findById(id).orElse(null);
 
         if(employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
@@ -45,15 +46,15 @@ public class EmployeeService {
 
         EmployeeDto updatedEmployeeDto = modelMapper.map(updatedEmployee, EmployeeDto.class);
 
-        return updatedEmployeeDto ;
+        return ResponseEntity.ok(updatedEmployeeDto) ;
 
     }
 
     public void deleteEmployee(Long id){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        Employee employee = employeeRepository.findById(id).orElse(null);
 
-        if( optionalEmployee.isEmpty()){
+        if( employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
@@ -61,22 +62,26 @@ public class EmployeeService {
 
     }
 
-    public Employee getEmployee(Long id){
+    public ResponseEntity<EmployeeDto> getEmployee(Long id){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        Employee employee = employeeRepository.findById(id).orElse(null);
 
-        if( optionalEmployee.isEmpty()){
+        if( employee == null ){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
-        return optionalEmployee.get();
+        EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
+
+        return ResponseEntity.ok(employeeDto) ;
 
     }
 
 
     public List<Employee> getAllEmployees(){
 
-        return employeeRepository.findAll();
+        List<Employee>  employees = employeeRepository.findAll();
+
+        return  employees ;
 
 
     }
