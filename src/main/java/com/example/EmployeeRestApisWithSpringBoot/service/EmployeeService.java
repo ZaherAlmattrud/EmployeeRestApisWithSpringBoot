@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -83,11 +84,11 @@ public class EmployeeService {
     }
 
 
-    public List<Employee> getAllEmployees(){
+    public List<EmployeeDto> getAllEmployees(){
 
         List<Employee>  employees = employeeRepository.findAll();
+        return   employees.stream().map(employee -> modelMapper.map(employee , EmployeeDto.class)).collect(Collectors.toList());
 
-        return  employees ;
 
 
     }
