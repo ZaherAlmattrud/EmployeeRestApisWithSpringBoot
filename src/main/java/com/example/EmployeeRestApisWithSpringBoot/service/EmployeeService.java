@@ -1,14 +1,18 @@
 package com.example.EmployeeRestApisWithSpringBoot.service;
 
 
+import com.example.EmployeeRestApisWithSpringBoot.dto.EmployeeDto;
 import com.example.EmployeeRestApisWithSpringBoot.exception.EmployeeNotFoundException;
 import com.example.EmployeeRestApisWithSpringBoot.model.Employee;
 import com.example.EmployeeRestApisWithSpringBoot.repository.EmployeeRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -17,30 +21,47 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository ;
 
+    @Autowired
+    private ModelMapper modelMapper;
 
-    public Employee createEmployee(Employee employee){
 
-        return employeeRepository.save(employee);
+    public ResponseEntity<EmployeeDto> createEmployee(EmployeeDto employeeDto){
+
+        Employee employee = modelMapper.map(employeeDto, Employee.class);
+        Employee savedEmployee = employeeRepository.save(employee);
+        EmployeeDto savedEmployeeDto = modelMapper.map(savedEmployee, EmployeeDto.class);
+        return ResponseEntity.ok(savedEmployeeDto) ;
     }
 
-    public Employee updateEmployee(Long id ,Employee employee){
+    public ResponseEntity<EmployeeDto> updateEmployee(Long id ,EmployeeDto employeeDto){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
 
-        if(! optionalEmployee.isPresent()){
+        Employee  employee = employeeRepository.findById(id).orElse(null);
+
+        System.out.print(employee);
+        if(employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
         employee.setId(id);
-        return employeeRepository.save(employee);
+        employee.setFirstName(employeeDto.getFirstName());
+        employee.setLastName(employeeDto.getLastName());
+        employee.setSalary(employeeDto.getSalary());
+
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        EmployeeDto updatedEmployeeDto = modelMapper.map(updatedEmployee, EmployeeDto.class);
+
+        return ResponseEntity.ok(updatedEmployeeDto) ;
 
     }
 
     public void deleteEmployee(Long id){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        Employee employee = employeeRepository.findById(id).orElse(null);
 
-        if( optionalEmployee.isEmpty()){
+        if( employee == null){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
@@ -48,22 +69,26 @@ public class EmployeeService {
 
     }
 
-    public Employee getEmployee(Long id){
+    public ResponseEntity<EmployeeDto> getEmployee(Long id){
 
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        Employee employee = employeeRepository.findById(id).orElse(null);
 
-        if( optionalEmployee.isEmpty()){
+        if( employee == null ){
             throw new EmployeeNotFoundException("Employee With ID : "+id+" Not Found");
         }
 
-        return optionalEmployee.get();
+        EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
+
+        return ResponseEntity.ok(employeeDto) ;
 
     }
 
 
-    public List<Employee> getAllEmployees(){
+    public List<EmployeeDto> getAllEmployees(){
 
-        return employeeRepository.findAll();
+        List<Employee>  employees = employeeRepository.findAll();
+        return   employees.stream().map(employee -> modelMapper.map(employee , EmployeeDto.class)).collect(Collectors.toList());
+
 
 
     }
